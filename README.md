@@ -1,5 +1,9 @@
 # axios-fluent
 
+[![npm version](https://badge.fury.io/js/axios-fluent.svg)](https://www.npmjs.com/package/axios-fluent)
+[![npm downloads](https://img.shields.io/npm/dm/axios-fluent.svg)](https://www.npmjs.com/package/axios-fluent)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A fluent, type-safe HTTP client wrapper around Axios with method chaining.
 
 ## Features
