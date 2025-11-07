@@ -1,0 +1,52 @@
+{
+  "name": "axios-fluent",
+  "version": "0.1.0",
+  "description": "A fluent, type-safe HTTP client wrapper around Axios with method chaining",
+  "main": "dist/Axon.js",
+  "types": "dist/Axon.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "axios",
+    "http",
+    "client",
+    "fluent",
+    "api",
+    "rest",
+    "request",
+    "promise",
+    "typescript"
+  ],
+  "author": "oharu121 <jefflin1201@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oharu121/axios-fluent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oharu121/axios-fluent/issues"
+  },
+  "homepage": "https://github.com/oharu121/axios-fluent#readme",
+  "peerDependencies": {
+    "axios": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "form-data": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

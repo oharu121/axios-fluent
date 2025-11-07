@@ -1,0 +1,52 @@
+# Source files
+*.ts
+!*.d.ts
+tsconfig.json
+
+# Tests
+test/
+tests/
+__tests__/
+*.test.ts
+*.spec.ts
+
+# Development files
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+circle.yml
+
+# Examples (users can view on GitHub)
+examples/
+
+# Development notes and internal docs
+dev-notes/
+PUBLISHING.md
+PRE-PUBLISH-CHECKLIST.md
+QUICK_START.md
+NAMING.md
+RELEASE-GUIDE.md
+verify-package.md
+CHANGELOG.md
+
+# Misc
+.DS_Store
+Thumbs.db
+.env
+.env.local
+node_modules/
+coverage/
+.nyc_output/
