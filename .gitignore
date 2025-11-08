@@ -42,12 +42,4 @@ coverage/
 Thumbs.db
 
 # Development documentation (not for distribution)
-PUBLISHING.md
-NAMING.md
-PRE-PUBLISH-CHECKLIST.md
-QUICK_START.md
-verify-package.md
-RELEASE-GUIDE.md
-TESTING-GUIDE.md
-POST-RELEASE-GUIDE.md
-dev-notes/
+docs

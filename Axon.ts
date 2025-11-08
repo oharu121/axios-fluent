@@ -4,6 +4,7 @@ import axios, {
   AxiosInstance,
   AxiosRequestTransformer,
   ResponseType,
+  AxiosError,
 } from "axios";
 import https from "https";
 
@@ -17,6 +18,180 @@ interface Options {
    * @warning Only use in development/testing environments
    */
   allowInsecure?: boolean;
+}
+
+/**
+ * Enhanced error class with convenient property access
+ * Wraps AxiosError to provide clearer error information
+ */
+export class AxonError extends Error {
+  public readonly status?: number;
+  public readonly statusText?: string;
+  public readonly responseData?: any;
+  public readonly url?: string;
+  public readonly method?: string;
+  public readonly headers?: any;
+  public readonly originalError: AxiosError;
+
+  constructor(error: AxiosError) {
+    super(error.message);
+    this.name = 'AxonError';
+    this.originalError = error;
+
+    if (error.response) {
+      // Server responded with error status
+      this.status = error.response.status;
+      this.statusText = error.response.statusText;
+      this.responseData = error.response.data;
+      this.headers = error.response.headers;
+    }
+
+    if (error.config) {
+      this.url = error.config.url;
+      this.method = error.config.method?.toUpperCase();
+    }
+
+    // Maintain proper stack trace
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AxonError);
+    }
+  }
+
+  /**
+   * Returns a formatted error message with all available details
+   */
+  public toString(): string {
+    const parts = [`AxonError: ${this.message}`];
+
+    if (this.method && this.url) {
+      parts.push(`  Request: ${this.method} ${this.url}`);
+    }
+
+    if (this.status) {
+      parts.push(`  Status: ${this.status} ${this.statusText || ''}`);
+    }
+
+    if (this.responseData) {
+      parts.push(`  Response: ${JSON.stringify(this.responseData)}`);
+    }
+
+    return parts.join('\n');
+  }
+}
+
+/**
+ * Wrapper around Axios response that provides convenient accessor methods
+ * Implements Promise interface to maintain backward compatibility
+ */
+export class AxonResponse<T = any> implements PromiseLike<AxiosResponse<T>> {
+  private responsePromise: Promise<AxiosResponse<T>>;
+
+  constructor(promise: Promise<AxiosResponse<T>>) {
+    this.responsePromise = promise.catch(error => {
+      // Wrap AxiosError in AxonError for better error messages
+      if (axios.isAxiosError(error)) {
+        throw new AxonError(error);
+      }
+      throw error;
+    });
+  }
+
+  /**
+   * Makes AxonResponse awaitable - returns full AxiosResponse
+   * This maintains backward compatibility with existing code
+   */
+  then<TResult1 = AxiosResponse<T>, TResult2 = never>(
+    onfulfilled?: ((value: AxiosResponse<T>) => TResult1 | PromiseLike<TResult1>) | null,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null
+  ): Promise<TResult1 | TResult2> {
+    return this.responsePromise.then(onfulfilled, onrejected);
+  }
+
+  /**
+   * Promise catch method for error handling
+   */
+  catch<TResult = never>(
+    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null
+  ): Promise<AxiosResponse<T> | TResult> {
+    return this.responsePromise.catch(onrejected);
+  }
+
+  /**
+   * Promise finally method
+   */
+  finally(onfinally?: (() => void) | null): Promise<AxiosResponse<T>> {
+    return this.responsePromise.finally(onfinally);
+  }
+
+  /**
+   * Extracts only the response data, discarding status, headers, etc.
+   *
+   * @returns Promise resolving to just the data (T)
+   *
+   * @example
+   * ```typescript
+   * // Instead of:
+   * const response = await client.get<User[]>('/users');
+   * const users = response.data;
+   *
+   * // You can now do:
+   * const users = await client.get<User[]>('/users').data();
+   * ```
+   */
+  async data(): Promise<T> {
+    const response = await this.responsePromise;
+    return response.data;
+  }
+
+  /**
+   * Extracts only the HTTP status code
+   *
+   * @returns Promise resolving to status code
+   *
+   * @example
+   * ```typescript
+   * const statusCode = await client.get('/users').status();
+   * console.log(statusCode); // 200
+   * ```
+   */
+  async status(): Promise<number> {
+    const response = await this.responsePromise;
+    return response.status;
+  }
+
+  /**
+   * Extracts only the response headers
+   *
+   * @returns Promise resolving to headers object
+   *
+   * @example
+   * ```typescript
+   * const headers = await client.get('/users').headers();
+   * console.log(headers['content-type']);
+   * ```
+   */
+  async headers(): Promise<any> {
+    const response = await this.responsePromise;
+    return response.headers;
+  }
+
+  /**
+   * Checks if response status is in 2xx range (success)
+   *
+   * @returns Promise resolving to boolean
+   *
+   * @example
+   * ```typescript
+   * const isOk = await client.get('/users').ok();
+   * if (isOk) {
+   *   console.log('Request succeeded');
+   * }
+   * ```
+   */
+  async ok(): Promise<boolean> {
+    const response = await this.responsePromise;
+    return response.status >= 200 && response.status < 300;
+  }
 }
 
 /**
@@ -80,17 +255,24 @@ class Axon {
    *
    * @template T - Expected response data type
    * @param url - The URL to request
-   * @returns Promise with typed Axios response
+   * @returns AxonResponse wrapper (awaitable, with convenience methods)
    *
    * @example
    * ```typescript
+   * // Get full response (backward compatible)
    * const response = await client.get<User>('/api/user/123');
    * console.log(response.data.name);
+   *
+   * // Get just the data (new convenience method)
+   * const user = await client.get<User>('/api/user/123').data();
+   * console.log(user.name);
+   *
+   * // Get just the status code
+   * const status = await client.get('/api/user/123').status();
    * ```
    */
-  public async get<T = any>(url: string): Promise<AxiosResponse<T>> {
-    const res = await this.instance.get<T>(url, this.config);
-    return res;
+  public get<T = any>(url: string): AxonResponse<T> {
+    return new AxonResponse(this.instance.get<T>(url, this.config));
   }
 
   /**
@@ -99,13 +281,10 @@ class Axon {
    * @template T - Expected response data type
    * @param url - The URL to request
    * @param payload - Optional request body
-   * @returns Promise with typed Axios response
+   * @returns AxonResponse wrapper (awaitable, with convenience methods)
    */
-  public async post<T = any>(
-    url: string,
-    payload?: any
-  ): Promise<AxiosResponse<T>> {
-    return await this.instance.post<T>(url, payload, this.config);
+  public post<T = any>(url: string, payload?: any): AxonResponse<T> {
+    return new AxonResponse(this.instance.post<T>(url, payload, this.config));
   }
 
   /**
@@ -114,10 +293,10 @@ class Axon {
    * @template T - Expected response data type
    * @param url - The URL to request
    * @param payload - Optional request body
-   * @returns Promise with typed Axios response
+   * @returns AxonResponse wrapper (awaitable, with convenience methods)
    */
-  public async put<T = any>(url: string, payload?: any): Promise<AxiosResponse<T>> {
-    return await this.instance.put<T>(url, payload, this.config);
+  public put<T = any>(url: string, payload?: any): AxonResponse<T> {
+    return new AxonResponse(this.instance.put<T>(url, payload, this.config));
   }
 
   /**
@@ -126,10 +305,10 @@ class Axon {
    * @template T - Expected response data type
    * @param url - The URL to request
    * @param payload - Optional request body
-   * @returns Promise with typed Axios response
+   * @returns AxonResponse wrapper (awaitable, with convenience methods)
    */
-  public async patch<T = any>(url: string, payload?: any): Promise<AxiosResponse<T>> {
-    return await this.instance.patch<T>(url, payload, this.config);
+  public patch<T = any>(url: string, payload?: any): AxonResponse<T> {
+    return new AxonResponse(this.instance.patch<T>(url, payload, this.config));
   }
 
   /**
@@ -138,13 +317,12 @@ class Axon {
    * @template T - Expected response data type
    * @param url - The URL to request
    * @param payload - Optional request body
-   * @returns Promise with typed Axios response
+   * @returns AxonResponse wrapper (awaitable, with convenience methods)
    */
-  public async delete<T = any>(
-    url: string,
-    payload?: any
-  ): Promise<AxiosResponse<T>> {
-    return await this.instance.delete<T>(url, { data: payload, ...this.config });
+  public delete<T = any>(url: string, payload?: any): AxonResponse<T> {
+    return new AxonResponse(
+      this.instance.delete<T>(url, { data: payload, ...this.config })
+    );
   }
 
   /**
@@ -152,10 +330,10 @@ class Axon {
    *
    * @template T - Expected response data type
    * @param url - The URL to request
-   * @returns Promise with typed Axios response
+   * @returns AxonResponse wrapper (awaitable, with convenience methods)
    */
-  public async head<T = any>(url: string): Promise<AxiosResponse<T>> {
-    return await this.instance.head<T>(url, this.config);
+  public head<T = any>(url: string): AxonResponse<T> {
+    return new AxonResponse(this.instance.head<T>(url, this.config));
   }
 
   /**
@@ -163,10 +341,10 @@ class Axon {
    *
    * @template T - Expected response data type
    * @param url - The URL to request
-   * @returns Promise with typed Axios response
+   * @returns AxonResponse wrapper (awaitable, with convenience methods)
    */
-  public async options<T = any>(url: string): Promise<AxiosResponse<T>> {
-    return await this.instance.options<T>(url, this.config);
+  public options<T = any>(url: string): AxonResponse<T> {
+    return new AxonResponse(this.instance.options<T>(url, this.config));
   }
 
   /**

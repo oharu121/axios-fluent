@@ -12,6 +12,8 @@ A fluent, type-safe HTTP client wrapper around Axios with method chaining.
 - Full TypeScript support with generic typing
 - Immutable configuration pattern
 - All HTTP methods (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
+- **Convenient response extraction** - `.data()`, `.status()`, `.headers()`, `.ok()` methods
+- **Enhanced error handling** - Clear, structured error information with `AxonError`
 - Built-in authentication helpers (Bearer, Basic)
 - Content-Type helpers
 - Request/response transformers
@@ -26,22 +28,26 @@ npm install axios-fluent
 ## Quick Start
 
 ```typescript
-import Axon from 'axios-fluent';
+import Axon from "axios-fluent";
 
 // Create a client
 const client = Axon.new();
 
-// Make a simple GET request
-const response = await client.get('https://api.example.com/users');
+// Make a simple GET request (backward compatible)
+const response = await client.get("https://api.example.com/users");
 console.log(response.data);
 
+// Or use .data() for cleaner code (new!)
+const users = await client.get<User[]>("https://api.example.com/users").data();
+
 // Chain configuration methods
-const response = await client
-  .baseUrl('https://api.example.com')
-  .bearer('your-jwt-token')
+const users = await client
+  .baseUrl("https://api.example.com")
+  .bearer("your-jwt-token")
   .json()
   .timeout(5000)
-  .get<User[]>('/users');
+  .get<User[]>("/users")
+  .data(); // Extract data directly!
 ```
 
 ## API Reference
@@ -53,6 +59,7 @@ const response = await client
 Creates a new Axon instance.
 
 **Options:**
+
 - `allowInsecure?: boolean` - Allow self-signed certificates (default: `false`)
 
 ```typescript
@@ -65,9 +72,12 @@ const devClient = Axon.new({ allowInsecure: true });
 
 ### HTTP Methods
 
-All HTTP methods support generic typing for type-safe responses.
+All HTTP methods return an `AxonResponse` wrapper that:
+- Is awaitable (backward compatible - returns full `AxiosResponse`)
+- Provides convenient methods: `.data()`, `.status()`, `.headers()`, `.ok()`
+- Supports full TypeScript generic typing
 
-#### `get<T>(url: string): Promise<AxiosResponse<T>>`
+#### `get<T>(url: string): AxonResponse<T>`
 
 ```typescript
 interface User {
@@ -75,47 +85,131 @@ interface User {
   name: string;
 }
 
-const response = await client.get<User>('/api/user/123');
+// Backward compatible - get full response
+const response = await client.get<User>("/api/user/123");
 console.log(response.data.name); // Type-safe access
+
+// New - get data directly (recommended)
+const user = await client.get<User>("/api/user/123").data();
+console.log(user.name); // Cleaner code!
+
+// Get just the status code
+const status = await client.get("/api/user/123").status(); // 200
+
+// Check if request succeeded
+const isOk = await client.get("/api/user/123").ok(); // true
 ```
 
 #### `post<T>(url: string, payload?: any): Promise<AxiosResponse<T>>`
 
 ```typescript
-const newUser = { name: 'John Doe', email: 'john@example.com' };
-const response = await client.post<User>('/api/users', newUser);
+const newUser = { name: "John Doe", email: "john@example.com" };
+const response = await client.post<User>("/api/users", newUser);
 ```
 
 #### `put<T>(url: string, payload?: any): Promise<AxiosResponse<T>>`
 
 ```typescript
-const updates = { name: 'Jane Doe' };
-await client.put('/api/user/123', updates);
+const updates = { name: "Jane Doe" };
+await client.put("/api/user/123", updates);
 ```
 
 #### `patch<T>(url: string, payload?: any): Promise<AxiosResponse<T>>`
 
 ```typescript
-await client.patch('/api/user/123', { email: 'new@example.com' });
+await client.patch("/api/user/123", { email: "new@example.com" });
 ```
 
 #### `delete<T>(url: string, payload?: any): Promise<AxiosResponse<T>>`
 
 ```typescript
-await client.delete('/api/user/123');
+await client.delete("/api/user/123");
 ```
 
 #### `head<T>(url: string): Promise<AxiosResponse<T>>`
 
 ```typescript
-const response = await client.head('/api/resource');
+const response = await client.head("/api/resource");
 console.log(response.headers);
 ```
 
 #### `options<T>(url: string): Promise<AxiosResponse<T>>`
 
 ```typescript
-const response = await client.options('/api/resource');
+const response = await client.options("/api/resource");
+```
+
+### Response Convenience Methods
+
+All HTTP methods return an `AxonResponse` wrapper with these convenient methods:
+
+#### `.data(): Promise<T>`
+
+Extracts only the response data, discarding status, headers, etc.
+
+```typescript
+// Instead of:
+const response = await client.get<User[]>('/users');
+const users = response.data;
+
+// You can now do:
+const users = await client.get<User[]>('/users').data();
+```
+
+#### `.status(): Promise<number>`
+
+Extracts only the HTTP status code.
+
+```typescript
+const statusCode = await client.get('/users').status();
+console.log(statusCode); // 200
+```
+
+#### `.headers(): Promise<any>`
+
+Extracts only the response headers.
+
+```typescript
+const headers = await client.get('/users').headers();
+console.log(headers['content-type']);
+```
+
+#### `.ok(): Promise<boolean>`
+
+Checks if the response status is in the 2xx range (success).
+
+```typescript
+const isSuccessful = await client.delete('/users/123').ok();
+if (isSuccessful) {
+  console.log('User deleted successfully');
+}
+```
+
+### Enhanced Error Handling
+
+Errors are automatically wrapped in `AxonError` for better debugging:
+
+```typescript
+import Axon, { AxonError } from 'axios-fluent';
+
+try {
+  await client.get('/api/users').data();
+} catch (error) {
+  if (error instanceof AxonError) {
+    console.log('Status:', error.status);           // 404
+    console.log('Status Text:', error.statusText);  // 'Not Found'
+    console.log('URL:', error.url);                 // '/api/users'
+    console.log('Method:', error.method);           // 'GET'
+    console.log('Response:', error.responseData);   // Error body
+
+    // Formatted error message
+    console.log(error.toString());
+    // AxonError: Request failed with status code 404
+    //   Request: GET /api/users
+    //   Status: 404 Not Found
+    //   Response: {"message":"Users not found"}
+  }
+}
 ```
 
 ### Configuration Methods
@@ -127,8 +221,8 @@ All configuration methods return a new Axon instance, making them chainable.
 Sets the base URL for all requests.
 
 ```typescript
-const client = Axon.new().baseUrl('https://api.example.com');
-await client.get('/users'); // Requests https://api.example.com/users
+const client = Axon.new().baseUrl("https://api.example.com");
+await client.get("/users"); // Requests https://api.example.com/users
 ```
 
 #### `timeout(ms: number): Axon`
@@ -146,9 +240,7 @@ const client = Axon.new().timeout(5000); // 5 second timeout
 Sets Bearer token authentication.
 
 ```typescript
-const client = Axon.new()
-  .bearer('your-jwt-token')
-  .get('/api/protected');
+const client = Axon.new().bearer("your-jwt-token").get("/api/protected");
 ```
 
 #### `basic(token: string): Axon`
@@ -156,7 +248,7 @@ const client = Axon.new()
 Sets Basic authentication.
 
 ```typescript
-const credentials = btoa('username:password');
+const credentials = btoa("username:password");
 const client = Axon.new().basic(credentials);
 ```
 
@@ -168,8 +260,8 @@ Sets a custom header.
 
 ```typescript
 const client = Axon.new()
-  .setHeader('X-API-Key', 'secret')
-  .setHeader('X-Custom-Header', 'value');
+  .setHeader("X-API-Key", "secret")
+  .setHeader("X-Custom-Header", "value");
 ```
 
 ### Content-Type Helpers
@@ -188,10 +280,10 @@ Sets `Content-Type: multipart/form-data`.
 
 ```typescript
 const formData = new FormData();
-formData.append('file', fileBlob);
+formData.append("file", fileBlob);
 
 const client = Axon.new().multipart();
-await client.post('/upload', formData);
+await client.post("/upload", formData);
 ```
 
 #### `encodeUrl(): Axon`
@@ -218,7 +310,7 @@ Sets query parameters.
 
 ```typescript
 const client = Axon.new().params({ page: 1, limit: 10 });
-await client.get('/api/users'); // Requests /api/users?page=1&limit=10
+await client.get("/api/users"); // Requests /api/users?page=1&limit=10
 ```
 
 ### Advanced Configuration
@@ -236,7 +328,7 @@ const client = Axon.new().length(1024);
 Sets the `Digest` header for content integrity.
 
 ```typescript
-const client = Axon.new().digest('sha256-hash');
+const client = Axon.new().digest("sha256-hash");
 ```
 
 #### `range(offset: number, end: number, fileSize: number): Axon`
@@ -263,8 +355,8 @@ const client = Axon.new().transformRequest((data, headers) => {
 Sets the expected response type.
 
 ```typescript
-const client = Axon.new().responseType('blob');
-const response = await client.get('/download/file.pdf');
+const client = Axon.new().responseType("blob");
+const response = await client.get("/download/file.pdf");
 ```
 
 ## Examples
@@ -272,83 +364,92 @@ const response = await client.get('/download/file.pdf');
 ### Basic API Client
 
 ```typescript
-import Axon from 'axon';
+import Axon from "axios-fluent";
 
 const api = Axon.new()
-  .baseUrl('https://api.example.com')
-  .bearer('your-jwt-token')
+  .baseUrl("https://api.example.com")
+  .bearer("your-jwt-token")
   .json()
   .timeout(10000);
 
-// Fetch users
-const users = await api.get<User[]>('/users');
+// Fetch users - using .data() for cleaner code
+const users = await api.get<User[]>("/users").data();
 
 // Create a new user
-const newUser = await api.post<User>('/users', {
-  name: 'John Doe',
-  email: 'john@example.com'
-});
+const newUser = await api.post<User>("/users", {
+  name: "John Doe",
+  email: "john@example.com",
+}).data();
 
 // Update user
-await api.put(`/users/${newUser.data.id}`, {
-  name: 'Jane Doe'
+await api.put(`/users/${newUser.id}`, {
+  name: "Jane Doe",
 });
 
-// Delete user
-await api.delete(`/users/${newUser.data.id}`);
+// Delete user and check if successful
+const deleted = await api.delete(`/users/${newUser.id}`).ok();
+console.log('Deleted:', deleted);
 ```
 
 ### File Upload
 
 ```typescript
-import Axon from 'axon';
-import FormData from 'form-data';
+import Axon from "axios-fluent";
+import FormData from "form-data";
 
 const formData = new FormData();
-formData.append('file', fileBlob);
-formData.append('name', 'document.pdf');
+formData.append("file", fileBlob);
+formData.append("name", "document.pdf");
 
 const response = await Axon.new()
-  .baseUrl('https://api.example.com')
-  .bearer('token')
+  .baseUrl("https://api.example.com")
+  .bearer("token")
   .multipart()
-  .post('/upload', formData);
+  .post("/upload", formData);
 ```
 
 ### Download File
 
 ```typescript
-import Axon from 'axon';
-import fs from 'fs';
+import Axon from "axios-fluent";
+import fs from "fs";
 
 const response = await Axon.new()
-  .responseType('blob')
-  .get('https://example.com/file.pdf');
+  .responseType("blob")
+  .get("https://example.com/file.pdf");
 
-fs.writeFileSync('file.pdf', response.data);
+fs.writeFileSync("file.pdf", response.data);
 ```
 
 ### Error Handling
 
 ```typescript
-import Axon from 'axon';
+import Axon, { AxonError } from "axios-fluent";
 
 try {
-  const response = await Axon.new()
-    .bearer('token')
-    .get('https://api.example.com/users');
+  const users = await Axon.new()
+    .bearer("token")
+    .get("https://api.example.com/users")
+    .data();
 
-  console.log(response.data);
+  console.log(users);
 } catch (error) {
-  if (error.response) {
-    // Server responded with error status
-    console.error('Error:', error.response.status, error.response.data);
-  } else if (error.request) {
-    // Request made but no response
-    console.error('No response received');
-  } else {
-    // Error setting up request
-    console.error('Error:', error.message);
+  // AxonError provides convenient access to error details
+  if (error instanceof AxonError) {
+    console.error("Status:", error.status);        // 404
+    console.error("URL:", error.url);              // https://api.example.com/users
+    console.error("Method:", error.method);        // GET
+    console.error("Response:", error.responseData);// Error body
+
+    // Formatted error message with all details
+    console.error(error.toString());
+
+    // Handle specific status codes
+    if (error.status === 401) {
+      console.log("Unauthorized - refresh token");
+    } else if (error.status >= 500) {
+      console.log("Server error - retry later");
+    }
   }
 }
 ```
@@ -356,24 +457,24 @@ try {
 ### Pagination
 
 ```typescript
-import Axon from 'axon';
+import Axon from "axios-fluent";
 
 async function fetchAllUsers() {
-  const client = Axon.new()
-    .baseUrl('https://api.example.com')
-    .bearer('token');
+  const client = Axon.new().baseUrl("https://api.example.com").bearer("token");
 
   let page = 1;
   let allUsers = [];
 
   while (true) {
+    // Use .data() for cleaner code
     const response = await client
       .params({ page, limit: 100 })
-      .get<{ users: User[], hasMore: boolean }>('/users');
+      .get<{ users: User[]; hasMore: boolean }>("/users")
+      .data();
 
-    allUsers.push(...response.data.users);
+    allUsers.push(...response.users);
 
-    if (!response.data.hasMore) break;
+    if (!response.hasMore) break;
     page++;
   }
 
@@ -419,8 +520,7 @@ interface User {
   email: string;
 }
 
-const response = await Axon.new()
-  .get<ApiResponse<User>>('/api/user/123');
+const response = await Axon.new().get<ApiResponse<User>>("/api/user/123");
 
 // Fully typed response
 console.log(response.data.data.name); // TypeScript knows the shape

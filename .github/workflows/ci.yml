@@ -22,13 +22,18 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
 
     - name: Install dependencies
-      run: npm ci
+      run: npm install
 
     - name: Build
       run: npm run build
+
+    - name: Run tests
+      run: npm test
+
+    - name: Run tests with coverage
+      run: npm run test:coverage
 
     - name: Verify build output
       run: |
@@ -36,6 +41,10 @@ jobs:
         test -f dist/Axon.d.ts || exit 1
         echo "Build output verified!"
 
-    # Uncomment when you add tests
-    # - name: Run tests
-    #   run: npm test
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
