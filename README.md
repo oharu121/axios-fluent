@@ -52,7 +52,7 @@ const users = await client
 
 ## API Reference
 
-### Factory Method
+### Factory Methods
 
 #### `Axon.new(options?: Options): Axon`
 
@@ -69,6 +69,20 @@ const client = Axon.new();
 // Allow self-signed certificates (development only)
 const devClient = Axon.new({ allowInsecure: true });
 ```
+
+#### `Axon.dev(): Axon`
+
+Creates a new Axon instance for development with `allowInsecure: true` enabled by default.
+
+```typescript
+// Quick development setup - allows self-signed certificates
+const client = Axon.dev();
+
+// Equivalent to:
+const client = Axon.new({ allowInsecure: true });
+```
+
+**⚠️ Warning:** Only use in development/testing environments. This disables SSL certificate verification.
 
 ### HTTP Methods
 
@@ -495,10 +509,13 @@ const client = Axon.new();
 
 ### Self-Signed Certificates (Development Only)
 
-Only use `allowInsecure: true` in development or testing environments with self-signed certificates.
+For development or testing environments with self-signed certificates, use the `dev()` factory method:
 
 ```typescript
 // Development only - NOT for production
+const devClient = Axon.dev();
+
+// Or use the explicit option
 const devClient = Axon.new({ allowInsecure: true });
 ```
 

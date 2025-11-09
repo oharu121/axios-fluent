@@ -240,6 +240,27 @@ class Axon {
   }
 
   /**
+   * Factory method to create a new Axon instance for development
+   * Automatically enables allowInsecure mode for working with self-signed certificates
+   *
+   * @returns A new Axon instance with insecure mode enabled
+   *
+   * @example
+   * ```typescript
+   * // Quick development setup - allows self-signed certificates
+   * const client = Axon.dev();
+   *
+   * // Equivalent to:
+   * const client = Axon.new({ allowInsecure: true });
+   * ```
+   *
+   * @warning Only use in development/testing environments
+   */
+  public static dev() {
+    return Axon.new({ allowInsecure: true });
+  }
+
+  /**
    * Creates a new Axon instance
    *
    * @param config - Axios request configuration

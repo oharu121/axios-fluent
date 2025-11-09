@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-01-09
+
+### Added
+- `Axon.dev()` factory method for quick development setup with self-signed certificates
+  - Automatically enables `allowInsecure: true` for easier development configuration
+  - Provides a convenient shorthand for `Axon.new({ allowInsecure: true })`
+  - Includes JSDoc documentation with usage examples and security warnings
+
+### Documentation
+- Updated README with `Axon.dev()` documentation and examples
+- Enhanced security section with `dev()` method usage
+
 ## [1.0.0] - 2025-01-08
 
 ### Added
