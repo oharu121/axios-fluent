@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `Axon.dev()` factory method for quick development setup with self-signed certificates
-  - Automatically enables `allowInsecure: true` for easier development configuration
-  - Provides a convenient shorthand for `Axon.new({ allowInsecure: true })`
-  - Includes JSDoc documentation with usage examples and security warnings
+- Automatically enables `allowInsecure: true` for easier development configuration
+- Provides a convenient shorthand for `Axon.new({ allowInsecure: true })`
+- Includes JSDoc documentation with usage examples and security warnings
 
 ### Documentation
 - Updated README with `Axon.dev()` documentation and examples
