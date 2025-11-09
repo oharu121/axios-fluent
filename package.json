@@ -1,6 +1,6 @@
 {
   "name": "axios-fluent",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A fluent, type-safe HTTP client wrapper around Axios with method chaining",
   "main": "dist/Axon.js",
   "types": "dist/Axon.d.ts",
