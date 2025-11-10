@@ -1,8 +1,14 @@
 # axios-fluent
 
-[![npm version](https://badge.fury.io/js/axios-fluent.svg)](https://www.npmjs.com/package/axios-fluent)
-[![npm downloads](https://img.shields.io/npm/dm/axios-fluent.svg)](https://www.npmjs.com/package/axios-fluent)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![npm version](https://badge.fury.io/js/axios-fluent.svg)](https://badge.fury.io/js/axios-fluent)
+![License](https://img.shields.io/npm/l/axios-fluent)
+![Types](https://img.shields.io/npm/types/axios-fluent)
+
+![NPM Downloads](https://img.shields.io/npm/dw/axios-fluent)
+![Last Commit](https://img.shields.io/github/last-commit/oharu121/axios-fluent)
+![CI Status](https://github.com/oharu121/axios-fluent/actions/workflows/ci.yml/badge.svg)
+![Coverage](https://codecov.io/gh/oharu121/axios-fluent/branch/main/graph/badge.svg)
+![GitHub Stars](https://img.shields.io/github/stars/oharu121/axios-fluent?style=social)
 
 A fluent, type-safe HTTP client wrapper around Axios with method chaining.
 

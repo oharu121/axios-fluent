@@ -41,10 +41,9 @@ jobs:
         test -f dist/Axon.d.ts || exit 1
         echo "Build output verified!"
 
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
       with:
+        token: ${{ secrets.CODECOV_TOKEN }}
         files: ./coverage/lcov.info
         flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
