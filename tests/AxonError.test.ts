@@ -72,23 +72,45 @@ describe('AxonError', () => {
       }
     });
 
-    it('should expose response headers', async () => {
+    it('should NOT expose headers (removed property)', async () => {
       try {
         await client.get('/api/users/999').data();
       } catch (error) {
         if (error instanceof AxonError) {
-          expect(error.headers).toBeDefined();
+          // @ts-expect-error - headers should not exist
+          expect(error.headers).toBeUndefined();
         }
       }
     });
 
-    it('should keep original AxiosError', async () => {
+    it('should NOT expose originalError (removed property)', async () => {
       try {
         await client.get('/api/users/999').data();
       } catch (error) {
         if (error instanceof AxonError) {
-          expect(error.originalError).toBeDefined();
-          expect(error.originalError).toHaveProperty('isAxiosError');
+          // @ts-expect-error - originalError should not exist
+          expect(error.originalError).toBeUndefined();
+        }
+      }
+    });
+
+    it('should only expose the 5 essential properties', async () => {
+      try {
+        await client.get('/api/users/999').data();
+      } catch (error) {
+        if (error instanceof AxonError) {
+          // Essential 5 properties
+          expect(error.status).toBeDefined();
+          expect(error.statusText).toBeDefined();
+          expect(error.url).toBeDefined();
+          expect(error.method).toBeDefined();
+          expect(error.responseData).toBeDefined();
+
+          // Should not have removed properties
+          // @ts-expect-error
+          expect(error.headers).toBeUndefined();
+          // @ts-expect-error
+          expect(error.originalError).toBeUndefined();
         }
       }
     });
@@ -293,6 +315,183 @@ describe('AxonError', () => {
       } catch (error) {
         if (error instanceof AxonError) {
           expect(error.name).toBe('AxonError');
+        }
+      }
+    });
+  });
+
+  describe('simplified error interface (5 essential properties)', () => {
+    it('should provide all 5 essential properties for typical error handling', async () => {
+      try {
+        await client.get('/api/users/999').data();
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        if (error instanceof AxonError) {
+          // All 5 essential properties should be defined
+          expect(error.status).toBe(404);
+          expect(error.statusText).toBeDefined();
+          expect(error.url).toContain('/api/users/999');
+          expect(error.method).toBe('GET');
+          expect(error.responseData).toEqual({ message: 'User not found' });
+        }
+      }
+    });
+
+    it('should support typical error logging pattern', async () => {
+      try {
+        await client.post('/api/users/999', { name: 'Test' }).data();
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        if (error instanceof AxonError) {
+          // This is what users typically need for logging
+          const logMessage = `${error.method} ${error.url} failed with ${error.status} ${error.statusText}`;
+          expect(logMessage).toContain('POST');
+          expect(logMessage).toContain('/api/users/999');
+          expect(logMessage).toContain('404');
+
+          // Response data for details
+          expect(error.responseData).toBeDefined();
+        }
+      }
+    });
+
+    it('should have clean property access without confusion', async () => {
+      try {
+        await client.get('/error/500').data();
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        if (error instanceof AxonError) {
+          // Clean, direct access to properties
+          const status = error.status;           // number | undefined
+          const statusText = error.statusText;   // string | undefined
+          const url = error.url;                 // string | undefined
+          const method = error.method;           // string | undefined
+          const data = error.responseData;       // any
+
+          expect(status).toBe(500);
+          expect(statusText).toBeDefined();
+          expect(url).toBeDefined();
+          expect(method).toBe('GET');
+          expect(data).toEqual({ message: 'Internal server error' });
+        }
+      }
+    });
+
+    it('should work with destructuring pattern', async () => {
+      try {
+        await client.get('/error/401').data();
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        if (error instanceof AxonError) {
+          // Users can destructure the 5 properties
+          const { status, statusText, url, method, responseData } = error;
+
+          expect(status).toBe(401);
+          expect(statusText).toBeDefined();
+          expect(url).toBeDefined();
+          expect(method).toBe('GET');
+          expect(responseData).toEqual({ message: 'Unauthorized' });
+        }
+      }
+    });
+
+    it('should support conditional error handling based on status', async () => {
+      try {
+        await client.get('/error/403').data();
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        if (error instanceof AxonError) {
+          // Common pattern: handle different status codes
+          if (error.status === 401) {
+            // Refresh token
+            expect(false).toBe(true);
+          } else if (error.status === 403) {
+            // Permission denied
+            expect(true).toBe(true);
+          } else if (error.status && error.status >= 500) {
+            // Server error
+            expect(false).toBe(true);
+          }
+        }
+      }
+    });
+
+    it('should provide clean error object for logging services', async () => {
+      try {
+        await client.delete('/api/users/999').data();
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        if (error instanceof AxonError) {
+          // Create clean error object for logging service
+          const errorLog = {
+            status: error.status,
+            statusText: error.statusText,
+            url: error.url,
+            method: error.method,
+            responseData: error.responseData,
+            message: error.message,
+          };
+
+          expect(errorLog.status).toBe(404);
+          expect(errorLog.method).toBe('DELETE');
+          expect(errorLog.url).toContain('/api/users/999');
+          expect(errorLog.responseData).toBeDefined();
+        }
+      }
+    });
+
+    it('should not have deprecated properties', async () => {
+      try {
+        await client.get('/api/users/999').data();
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        if (error instanceof AxonError) {
+          // Verify removed properties don't exist
+          const errorObj = error as any;
+
+          // These should be undefined (removed)
+          expect(errorObj.headers).toBeUndefined();
+          expect(errorObj.originalError).toBeUndefined();
+
+          // Only these 5 + inherited Error properties should exist
+          const ownProps = Object.getOwnPropertyNames(error);
+          const expectedProps = ['status', 'statusText', 'responseData', 'url', 'method'];
+
+          // Check that our 5 properties are present
+          expectedProps.forEach(prop => {
+            expect(ownProps).toContain(prop);
+          });
+
+          // Check that removed properties are not present
+          expect(ownProps).not.toContain('headers');
+          expect(ownProps).not.toContain('originalError');
+        }
+      }
+    });
+
+    it('should provide all necessary info for error messages', async () => {
+      try {
+        await client.put('/api/users/999', { name: 'Updated' }).data();
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        if (error instanceof AxonError) {
+          // Example: Create user-friendly error message
+          let userMessage = `Request failed`;
+
+          if (error.status === 404) {
+            userMessage = 'Resource not found';
+          } else if (error.status === 401) {
+            userMessage = 'Please log in again';
+          } else if (error.status && error.status >= 500) {
+            userMessage = 'Server error, please try again later';
+          }
+
+          // All info needed for debugging
+          expect(error.method).toBe('PUT');
+          expect(error.url).toContain('/api/users/999');
+          expect(error.status).toBe(404);
+          expect(error.responseData).toBeDefined();
+          expect(userMessage).toBe('Resource not found');
         }
       }
     });

@@ -30,20 +30,16 @@ export class AxonError extends Error {
   public readonly responseData?: any;
   public readonly url?: string;
   public readonly method?: string;
-  public readonly headers?: any;
-  public readonly originalError: AxiosError;
 
   constructor(error: AxiosError) {
     super(error.message);
     this.name = 'AxonError';
-    this.originalError = error;
 
     if (error.response) {
       // Server responded with error status
       this.status = error.response.status;
       this.statusText = error.response.statusText;
       this.responseData = error.response.data;
-      this.headers = error.response.headers;
     }
 
     if (error.config) {

@@ -201,7 +201,7 @@ if (isSuccessful) {
 
 ### Enhanced Error Handling
 
-Errors are automatically wrapped in `AxonError` for better debugging:
+Errors are automatically wrapped in `AxonError` with 5 essential properties for debugging:
 
 ```typescript
 import Axon, { AxonError } from 'axios-fluent';
@@ -210,6 +210,7 @@ try {
   await client.get('/api/users').data();
 } catch (error) {
   if (error instanceof AxonError) {
+    // 5 essential properties for error handling
     console.log('Status:', error.status);           // 404
     console.log('Status Text:', error.statusText);  // 'Not Found'
     console.log('URL:', error.url);                 // '/api/users'
@@ -225,6 +226,13 @@ try {
   }
 }
 ```
+
+**AxonError Properties:**
+- `status` - HTTP status code (404, 500, etc.)
+- `statusText` - Human-readable status text
+- `url` - Request URL
+- `method` - HTTP method (GET, POST, etc.)
+- `responseData` - Error response body
 
 ### Configuration Methods
 

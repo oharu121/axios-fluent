@@ -31,9 +31,8 @@ jobs:
         test -f dist/Axon.d.ts || exit 1
         echo "Build output verified!"
 
-    # Uncomment when you have tests
-    # - name: Run tests
-    #   run: npm test
+    - name: Run tests
+      run: npm test
 
     - name: Publish to npm
       run: npm publish
