@@ -1,4 +1,4 @@
-import Axon from '../Axon';
+import Axon from '../index';
 
 /**
  * API Client Example

@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import Axon from '../Axon';
+import Axon from '../index';
 
 describe('Configuration Methods', () => {
   describe('baseUrl()', () => {

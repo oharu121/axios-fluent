@@ -6,8 +6,8 @@
 
 ![NPM Downloads](https://img.shields.io/npm/dw/axios-fluent)
 ![Last Commit](https://img.shields.io/github/last-commit/oharu121/axios-fluent)
-![CI Status](https://github.com/oharu121/axios-fluent/actions/workflows/ci.yml/badge.svg)
 ![Coverage](https://codecov.io/gh/oharu121/axios-fluent/branch/main/graph/badge.svg)
+![CI Status](https://github.com/oharu121/axios-fluent/actions/workflows/ci.yml/badge.svg)
 ![GitHub Stars](https://img.shields.io/github/stars/oharu121/axios-fluent?style=social)
 
 A fluent, type-safe HTTP client wrapper around Axios with method chaining.
@@ -29,6 +29,19 @@ A fluent, type-safe HTTP client wrapper around Axios with method chaining.
 
 ```bash
 npm install axios-fluent
+```
+
+## Importing
+
+```typescript
+// Default export (recommended)
+import Axon from "axios-fluent";
+
+// Named export (alternative)
+import { Axon } from "axios-fluent";
+
+// With error class
+import Axon, { AxonError } from "axios-fluent";
 ```
 
 ## Quick Start

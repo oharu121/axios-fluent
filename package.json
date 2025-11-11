@@ -1,14 +1,14 @@
 {
   "name": "axios-fluent",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A fluent, type-safe HTTP client wrapper around Axios with method chaining",
-  "main": "dist/Axon.js",
-  "types": "dist/Axon.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/Axon.js",
-      "require": "./dist/Axon.js",
-      "types": "./dist/Axon.d.ts"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "files": [
