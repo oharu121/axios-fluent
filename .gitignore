@@ -6,6 +6,8 @@ yarn.lock
 # Build output
 dist/
 *.tsbuildinfo
+/index.js
+/index.d.ts
 
 # Logs
 logs/
