@@ -21,9 +21,7 @@ export default defineConfig({
         'tests/**',
         '**/*.test.ts',
         '**/*.spec.ts',
-        'index.ts',
         'vitest.config.ts',
-        'postbuild.js',
       ],
       // Thresholds - enforce minimum coverage
       thresholds: {

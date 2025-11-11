@@ -19,8 +19,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc && npm run postbuild",
-    "postbuild": "node postbuild.js",
+    "build": "tsc",
     "prepare": "npm run build",
     "test": "npx vitest run",
     "test:watch": "npx vitest",

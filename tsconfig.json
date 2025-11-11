@@ -28,7 +28,6 @@
     "resolveJsonModule": true
   },
   "include": [
-    "index.ts",
     "Axon.ts"
   ],
   "exclude": [
