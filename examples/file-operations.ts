@@ -1,4 +1,4 @@
-import Axon from '../index';
+import Axon from '../Axon';
 import FormData from 'form-data';
 import fs from 'fs';
 import path from 'path';

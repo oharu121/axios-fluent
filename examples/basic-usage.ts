@@ -1,4 +1,4 @@
-import Axon from '../index';
+import Axon from '../Axon';
 
 /**
  * Basic Usage Example

@@ -5,7 +5,7 @@
  * that make it easier to extract specific parts of the response.
  */
 
-import Axon, { AxonError } from '../index';
+import Axon, { AxonError } from '../Axon';
 
 interface User {
   id: number;

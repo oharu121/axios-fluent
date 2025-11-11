@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import Axon from '../index';
+import Axon from '../Axon';
 
 describe('AxonResponse', () => {
   const client = Axon.new().baseUrl('https://api.example.com');

@@ -18,8 +18,12 @@ export default defineConfig({
         'dist/**',
         'examples/**',
         'dev-notes/**',
+        'tests/**',
         '**/*.test.ts',
         '**/*.spec.ts',
+        'index.ts',
+        'vitest.config.ts',
+        'postbuild.js',
       ],
       // Thresholds - enforce minimum coverage
       thresholds: {
