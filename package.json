@@ -24,7 +24,9 @@
     "test": "npx vitest run",
     "test:watch": "npx vitest",
     "test:coverage": "npx vitest run --coverage",
-    "test:ui": "npx vitest --ui"
+    "test:ui": "npx vitest --ui",
+    "sync": "git pull --rebase && npm install && npm test",
+    "sync:quick": "git pull --rebase && npm install"
   },
   "keywords": [
     "axios",
