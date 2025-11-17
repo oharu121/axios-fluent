@@ -46,10 +46,5 @@ export default defineConfig({
 
     // Run tests in parallel
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: false,
-      },
-    },
   },
 });
