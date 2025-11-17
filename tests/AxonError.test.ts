@@ -318,6 +318,34 @@ describe('AxonError', () => {
         }
       }
     });
+
+    it('should pass through non-AxiosError errors', async () => {
+      // Create a client with a custom axios instance that throws a non-AxiosError
+      const customAxios: any = {
+        get: () => Promise.reject(new Error('Custom non-Axios error')),
+        post: () => Promise.reject(new Error('Custom non-Axios error')),
+        put: () => Promise.reject(new Error('Custom non-Axios error')),
+        patch: () => Promise.reject(new Error('Custom non-Axios error')),
+        delete: () => Promise.reject(new Error('Custom non-Axios error')),
+        head: () => Promise.reject(new Error('Custom non-Axios error')),
+        options: () => Promise.reject(new Error('Custom non-Axios error')),
+      };
+
+      // @ts-expect-error - Testing with custom instance
+      const clientWithCustomAxios = new Axon({}, customAxios);
+
+      try {
+        await clientWithCustomAxios.get('/test').data();
+        expect.fail('Should have thrown an error');
+      } catch (error) {
+        // Should NOT be wrapped in AxonError since it's not an AxiosError
+        expect(error).not.toBeInstanceOf(AxonError);
+        expect(error).toBeInstanceOf(Error);
+        if (error instanceof Error) {
+          expect(error.message).toBe('Custom non-Axios error');
+        }
+      }
+    });
   });
 
   describe('simplified error interface (5 essential properties)', () => {

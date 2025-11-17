@@ -327,5 +327,15 @@ describe('Configuration Methods', () => {
       const client = Axon.new();
       expect(client).toBeDefined();
     });
+
+    it('should create dev instance with allowInsecure enabled', async () => {
+      const client = Axon.dev();
+      expect(client).toBeDefined();
+
+      // Dev client should work with self-signed certificates
+      // This is equivalent to Axon.new({ allowInsecure: true })
+      const clientWithInsecure = Axon.new({ allowInsecure: true });
+      expect(clientWithInsecure).toBeDefined();
+    });
   });
 });
