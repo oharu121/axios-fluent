@@ -1,6 +1,6 @@
 {
   "name": "axios-fluent",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A fluent, type-safe HTTP client wrapper around Axios with method chaining",
   "type": "module",
   "main": "index.js",
