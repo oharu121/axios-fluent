@@ -4,8 +4,5 @@
  * @license MIT
  */
 
-'use strict';
-
-module.exports = require('./dist/Axon');
-module.exports.default = require('./dist/Axon').default;
-module.exports.AxonError = require('./dist/Axon').AxonError;
+export { default, AxonError } from './dist/Axon.js';
+export * from './dist/Axon.js';

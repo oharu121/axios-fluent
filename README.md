@@ -3,7 +3,6 @@
 [![npm version](https://badge.fury.io/js/axios-fluent.svg)](https://badge.fury.io/js/axios-fluent)
 ![License](https://img.shields.io/npm/l/axios-fluent)
 ![Types](https://img.shields.io/npm/types/axios-fluent)
-
 ![NPM Downloads](https://img.shields.io/npm/dw/axios-fluent)
 ![Last Commit](https://img.shields.io/github/last-commit/oharu121/axios-fluent)
 ![Coverage](https://codecov.io/gh/oharu121/axios-fluent/branch/main/graph/badge.svg)
