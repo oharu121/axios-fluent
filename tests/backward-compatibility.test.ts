@@ -94,7 +94,7 @@ describe('Backward Compatibility', () => {
       const result = await client
         .get('/api/users')
         .then((response) => response.data)
-        .catch((error) => [])
+        .catch((_error) => [])
         .finally(() => {
           finallyCalled = true;
         });

@@ -13,7 +13,7 @@ interface User {
   email: string;
 }
 
-interface ApiResponse<T> {
+interface _ApiResponse<T> {
   data: T;
   message: string;
 }

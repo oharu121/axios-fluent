@@ -23,19 +23,20 @@ async function basicErrorHandling() {
   try {
     // Try to fetch a non-existent resource
     await client.get('/users/99999');
-  } catch (error: any) {
-    if (error.response) {
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { status: number; data: unknown; headers: unknown }; request?: unknown; message?: string };
+    if (axiosError.response) {
       // Server responded with error status
-      console.error('Status:', error.response.status);
-      console.error('Data:', error.response.data);
-      console.error('Headers:', error.response.headers);
-    } else if (error.request) {
+      console.error('Status:', axiosError.response.status);
+      console.error('Data:', axiosError.response.data);
+      console.error('Headers:', axiosError.response.headers);
+    } else if (axiosError.request) {
       // Request made but no response
       console.error('No response received');
-      console.error('Request:', error.request);
+      console.error('Request:', axiosError.request);
     } else {
       // Error setting up request
-      console.error('Error:', error.message);
+      console.error('Error:', axiosError.message);
     }
   }
 }
@@ -92,7 +93,7 @@ async function retryWithExponentialBackoff() {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         return await requestFn();
-      } catch (error: any) {
+      } catch (error: unknown) {
         const isLastAttempt = attempt === maxRetries - 1;
 
         if (isLastAttempt) {
@@ -100,10 +101,11 @@ async function retryWithExponentialBackoff() {
         }
 
         // Check if error is retryable
+        const axiosError = error as { response?: { status: number } };
         const isRetryable =
-          !error.response ||
-          error.response.status >= 500 ||
-          error.response.status === 429;
+          !axiosError.response ||
+          axiosError.response.status >= 500 ||
+          axiosError.response.status === 429;
 
         if (!isRetryable) {
           throw error;
@@ -130,8 +132,8 @@ async function retryWithExponentialBackoff() {
       client.get('/unstable-endpoint')
     );
     console.log('Success:', result);
-  } catch (error: any) {
-    console.error('All retries failed:', error.message);
+  } catch (error: unknown) {
+    console.error('All retries failed:', (error as Error).message);
   }
 }
 
@@ -145,11 +147,12 @@ async function timeoutHandling() {
   try {
     // This endpoint delays for 5 seconds
     await client.get('/delay/5');
-  } catch (error: any) {
-    if (error.code === 'ECONNABORTED') {
+  } catch (error: unknown) {
+    const axiosError = error as { code?: string; message?: string };
+    if (axiosError.code === 'ECONNABORTED') {
       console.error('Request timed out');
     } else {
-      console.error('Error:', error.message);
+      console.error('Error:', axiosError.message);
     }
   }
 }
@@ -163,13 +166,14 @@ async function networkErrorHandling() {
 
   try {
     await client.get('/api/data');
-  } catch (error: any) {
-    if (error.code === 'ENOTFOUND') {
+  } catch (error: unknown) {
+    const axiosError = error as { code?: string; message?: string };
+    if (axiosError.code === 'ENOTFOUND') {
       console.error('Network error: Host not found');
-    } else if (error.code === 'ECONNREFUSED') {
+    } else if (axiosError.code === 'ECONNREFUSED') {
       console.error('Network error: Connection refused');
     } else {
-      console.error('Network error:', error.message);
+      console.error('Network error:', axiosError.message);
     }
   }
 }
@@ -187,9 +191,10 @@ async function validationErrorHandling() {
       // Missing required fields
       invalidField: 'value'
     });
-  } catch (error: any) {
-    if (error.response?.status === 400) {
-      console.error('Validation error:', error.response.data);
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { status: number; data: unknown } };
+    if (axiosError.response?.status === 400) {
+      console.error('Validation error:', axiosError.response.data);
       // Handle validation errors from server
     }
   }

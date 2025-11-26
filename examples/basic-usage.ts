@@ -46,8 +46,8 @@ async function basicExample() {
     await client.delete('https://jsonplaceholder.typicode.com/users/1');
     console.log('Deleted successfully');
 
-  } catch (error: any) {
-    console.error('Error:', error.message);
+  } catch (error: unknown) {
+    console.error('Error:', (error as Error).message);
   }
 }
 

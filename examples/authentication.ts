@@ -33,8 +33,8 @@ async function bearerTokenExample() {
   try {
     const response = await client.get<ProtectedResource>('/protected/resource');
     console.log('Protected resource:', response.data);
-  } catch (error: any) {
-    console.error('Bearer auth error:', error.message);
+  } catch (error: unknown) {
+    console.error('Bearer auth error:', (error as Error).message);
   }
 }
 
@@ -54,8 +54,8 @@ async function basicAuthExample() {
   try {
     const response = await client.get('/protected/resource');
     console.log('Protected resource:', response.data);
-  } catch (error: any) {
-    console.error('Basic auth error:', error.message);
+  } catch (error: unknown) {
+    console.error('Basic auth error:', (error as Error).message);
   }
 }
 
@@ -70,8 +70,8 @@ async function apiKeyExample() {
   try {
     const response = await client.get('/protected/resource');
     console.log('Protected resource:', response.data);
-  } catch (error: any) {
-    console.error('API key error:', error.message);
+  } catch (error: unknown) {
+    console.error('API key error:', (error as Error).message);
   }
 }
 
@@ -104,9 +104,10 @@ async function refreshTokenExample() {
     // Try to make a request
     const response = await client.get('/protected/resource');
     console.log('Success:', response.data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     // If token expired, refresh and retry
-    if (error.response?.status === 401) {
+    const axiosError = error as { response?: { status: number } };
+    if (axiosError.response?.status === 401) {
       console.log('Token expired, refreshing...');
       accessToken = await refreshAccessToken();
 
@@ -127,14 +128,14 @@ async function multiHeaderAuthExample() {
     .baseUrl('https://api.example.com')
     .setHeader('X-API-Key', 'your-api-key')
     .setHeader('X-Client-ID', 'client-123')
-    .setHeader('X-Request-ID', crypto.randomUUID())
+    .setHeader('X-Request-ID', globalThis.crypto.randomUUID())
     .json();
 
   try {
     const response = await client.get('/protected/resource');
     console.log('Protected resource:', response.data);
-  } catch (error: any) {
-    console.error('Multi-header auth error:', error.message);
+  } catch (error: unknown) {
+    console.error('Multi-header auth error:', (error as Error).message);
   }
 }
 

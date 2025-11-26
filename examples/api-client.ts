@@ -99,8 +99,8 @@ async function runExample() {
     });
     console.log('Created post:', newPost);
 
-  } catch (error: any) {
-    console.error('API Error:', error.message);
+  } catch (error: unknown) {
+    console.error('API Error:', (error as Error).message);
   }
 }
 

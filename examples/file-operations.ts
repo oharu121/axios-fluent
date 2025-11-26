@@ -28,8 +28,8 @@ async function uploadFile() {
   try {
     const response = await client.post('/upload', formData);
     console.log('Upload successful:', response.data);
-  } catch (error: any) {
-    console.error('Upload failed:', error.message);
+  } catch (error: unknown) {
+    console.error('Upload failed:', (error as Error).message);
   }
 }
 
@@ -56,8 +56,8 @@ async function uploadMultipleFiles() {
   try {
     const response = await client.post('/upload/multiple', formData);
     console.log('Multiple uploads successful:', response.data);
-  } catch (error: any) {
-    console.error('Upload failed:', error.message);
+  } catch (error: unknown) {
+    console.error('Upload failed:', (error as Error).message);
   }
 }
 
@@ -77,8 +77,8 @@ async function downloadFile() {
     fs.writeFileSync(outputPath, response.data);
 
     console.log(`File downloaded to: ${outputPath}`);
-  } catch (error: any) {
-    console.error('Download failed:', error.message);
+  } catch (error: unknown) {
+    console.error('Download failed:', (error as Error).message);
   }
 }
 
@@ -112,8 +112,8 @@ async function downloadWithProgress() {
     });
 
     console.log(`Download complete: ${outputPath}`);
-  } catch (error: any) {
-    console.error('Download failed:', error.message);
+  } catch (error: unknown) {
+    console.error('Download failed:', (error as Error).message);
   }
 }
 
@@ -162,8 +162,8 @@ async function chunkedUpload() {
       .post(`/upload/${uploadId}/complete`, {});
 
     console.log('Chunked upload complete');
-  } catch (error: any) {
-    console.error('Chunked upload failed:', error.message);
+  } catch (error: unknown) {
+    console.error('Chunked upload failed:', (error as Error).message);
   }
 }
 
@@ -192,8 +192,8 @@ async function uploadWithMetadata() {
   try {
     const response = await client.post('/photos/upload', formData);
     console.log('Upload with metadata successful:', response.data);
-  } catch (error: any) {
-    console.error('Upload failed:', error.message);
+  } catch (error: unknown) {
+    console.error('Upload failed:', (error as Error).message);
   }
 }
 

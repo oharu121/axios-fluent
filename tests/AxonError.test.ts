@@ -107,9 +107,9 @@ describe('AxonError', () => {
           expect(error.responseData).toBeDefined();
 
           // Should not have removed properties
-          // @ts-expect-error
+          // @ts-expect-error - headers property was removed
           expect(error.headers).toBeUndefined();
-          // @ts-expect-error
+          // @ts-expect-error - originalError property was removed
           expect(error.originalError).toBeUndefined();
         }
       }

@@ -27,7 +27,7 @@ interface Options {
 export class AxonError extends Error {
   public readonly status?: number;
   public readonly statusText?: string;
-  public readonly responseData?: any;
+  public readonly responseData?: unknown;
   public readonly url?: string;
   public readonly method?: string;
 
@@ -79,7 +79,7 @@ export class AxonError extends Error {
  * Wrapper around Axios response that provides convenient accessor methods
  * Implements Promise interface to maintain backward compatibility
  */
-export class AxonResponse<T = any> implements PromiseLike<AxiosResponse<T>> {
+export class AxonResponse<T = unknown> implements PromiseLike<AxiosResponse<T>> {
   private responsePromise: Promise<AxiosResponse<T>>;
 
   constructor(promise: Promise<AxiosResponse<T>>) {
@@ -98,7 +98,7 @@ export class AxonResponse<T = any> implements PromiseLike<AxiosResponse<T>> {
    */
   then<TResult1 = AxiosResponse<T>, TResult2 = never>(
     onfulfilled?: ((value: AxiosResponse<T>) => TResult1 | PromiseLike<TResult1>) | null,
-    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null
+    onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
   ): Promise<TResult1 | TResult2> {
     return this.responsePromise.then(onfulfilled, onrejected);
   }
@@ -107,7 +107,7 @@ export class AxonResponse<T = any> implements PromiseLike<AxiosResponse<T>> {
    * Promise catch method for error handling
    */
   catch<TResult = never>(
-    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null
+    onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | null
   ): Promise<AxiosResponse<T> | TResult> {
     return this.responsePromise.catch(onrejected);
   }
@@ -166,7 +166,7 @@ export class AxonResponse<T = any> implements PromiseLike<AxiosResponse<T>> {
    * console.log(headers['content-type']);
    * ```
    */
-  async headers(): Promise<any> {
+  async headers(): Promise<Record<string, unknown>> {
     const response = await this.responsePromise;
     return response.headers;
   }
@@ -288,7 +288,7 @@ class Axon {
    * const status = await client.get('/api/user/123').status();
    * ```
    */
-  public get<T = any>(url: string): AxonResponse<T> {
+  public get<T = unknown>(url: string): AxonResponse<T> {
     return new AxonResponse(this.instance.get<T>(url, this.config));
   }
 
@@ -300,7 +300,7 @@ class Axon {
    * @param payload - Optional request body
    * @returns AxonResponse wrapper (awaitable, with convenience methods)
    */
-  public post<T = any>(url: string, payload?: any): AxonResponse<T> {
+  public post<T = unknown>(url: string, payload?: unknown): AxonResponse<T> {
     return new AxonResponse(this.instance.post<T>(url, payload, this.config));
   }
 
@@ -312,7 +312,7 @@ class Axon {
    * @param payload - Optional request body
    * @returns AxonResponse wrapper (awaitable, with convenience methods)
    */
-  public put<T = any>(url: string, payload?: any): AxonResponse<T> {
+  public put<T = unknown>(url: string, payload?: unknown): AxonResponse<T> {
     return new AxonResponse(this.instance.put<T>(url, payload, this.config));
   }
 
@@ -324,7 +324,7 @@ class Axon {
    * @param payload - Optional request body
    * @returns AxonResponse wrapper (awaitable, with convenience methods)
    */
-  public patch<T = any>(url: string, payload?: any): AxonResponse<T> {
+  public patch<T = unknown>(url: string, payload?: unknown): AxonResponse<T> {
     return new AxonResponse(this.instance.patch<T>(url, payload, this.config));
   }
 
@@ -336,7 +336,7 @@ class Axon {
    * @param payload - Optional request body
    * @returns AxonResponse wrapper (awaitable, with convenience methods)
    */
-  public delete<T = any>(url: string, payload?: any): AxonResponse<T> {
+  public delete<T = unknown>(url: string, payload?: unknown): AxonResponse<T> {
     return new AxonResponse(
       this.instance.delete<T>(url, { data: payload, ...this.config })
     );
@@ -349,7 +349,7 @@ class Axon {
    * @param url - The URL to request
    * @returns AxonResponse wrapper (awaitable, with convenience methods)
    */
-  public head<T = any>(url: string): AxonResponse<T> {
+  public head<T = unknown>(url: string): AxonResponse<T> {
     return new AxonResponse(this.instance.head<T>(url, this.config));
   }
 
@@ -360,7 +360,7 @@ class Axon {
    * @param url - The URL to request
    * @returns AxonResponse wrapper (awaitable, with convenience methods)
    */
-  public options<T = any>(url: string): AxonResponse<T> {
+  public options<T = unknown>(url: string): AxonResponse<T> {
     return new AxonResponse(this.instance.options<T>(url, this.config));
   }
 
