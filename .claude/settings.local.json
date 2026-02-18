@@ -1,7 +1,12 @@
 {
   "permissions": {
-    "allow": ["Bash(dir:*)", "Bash(findstr:*)", "Bash(npm run lint)"],
-    "deny": ["Bash(nul)"],
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(pnpm run lint)",
+      "Bash(pnpm --version:*)"
+    ],
+    "deny": [],
     "ask": []
   }
 }

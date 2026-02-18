@@ -21,14 +21,14 @@
   ],
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build",
-    "test": "npx vitest run",
-    "test:watch": "npx vitest",
-    "test:coverage": "npx vitest run --coverage",
-    "test:ui": "npx vitest --ui",
-    "test:all": "npm run typecheck && npm run lint && npm run test",
-    "sync": "git pull --rebase && npm install && npm test",
-    "sync:quick": "git pull --rebase && npm install",
+    "prepare": "pnpm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "test:all": "pnpm run typecheck && pnpm run lint && pnpm run test",
+    "sync": "git pull --rebase && pnpm install && pnpm test",
+    "sync:quick": "git pull --rebase && pnpm install",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -79,5 +79,6 @@
   },
   "engines": {
     "node": ">=20.0.0"
-  }
+  },
+  "packageManager": "pnpm@10.21.0"
 }
